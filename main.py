@@ -17,9 +17,32 @@ class Blog(db.Model):
         self.title = title
         self.body = body
     
+@app.route('/', methods=['POST', 'GET'])
+def index():
+    post_id = request.args.get('id')
+    title = 'Build a Blog'
+    posts = []
+    if post_id:
+        posts = Blog.query.filter_by(id=post_id).all()
+        title = Blog.title
+        return render_template('post.html', title = title, posts = posts, id = id)
+    return redirect('/blog')
 
-@app.route('/blog')
+
+# @app.route('/post')
+# def post():
+#     post_id = request.args.get('id')
+#     title = 'build a blog'
+#     posts = []
+
+#     if post_id:
+#         posts = Blog.query.filter_by(id = post_id).all()
+#         title = Blog.title
+
+@app.route('/blog', methods=['POST', 'GET'])
 def blog():
+    
+
     posts = Blog.query.all()
     return render_template('blog.html', posts = posts)
 
@@ -34,14 +57,16 @@ def newpost():
 
         if not title:
             title_error = 'You need to have a title!'
+            return render_template('newpost.html', title_error = title_error, text_error = text_error)
         if not body:
             text_error = 'You need to add content!'
+            return render_template('newpost.html', title_error = title_error, text_error = text_error)
 
         new_post = Blog(title, body)
         db.session.add(new_post)
         db.session.commit()
 
-        return redirect('/blog')
-    return render_template('newpost.html')
+        return render_template('/', title=title,)
+    return render_template('newpost.html', title_error = title_error, text_error = text_error)
 if __name__ == '__main__':
     app.run()

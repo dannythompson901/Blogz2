@@ -5,12 +5,12 @@
 <form action="/newpost" method="post">
     <label for="title">Title <br>
     <input type="text" name="title" id="title"><br>
-        <p>{{title_error}}</p>
+        <p class="error">{{title_error}}</p>
     </label>
     <br>
     <label for="body">Your Message <br>
     <textarea name="body" id="" cols="30" rows="10"></textarea><br>
-        <p>{{text_error}}</p>
+        <p class="error">{{text_error}}</p>
     </label>
     <br>
     <button type="submit">submit</button>
