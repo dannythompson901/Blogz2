@@ -3,17 +3,11 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:localhost@localhost:3306/blogz'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:blog@localhost:3306/blogz'
 app.config['SQLALCHEMY_ECHO'] = True
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS']= False
 app.secret_key = 'wakaflaka123'
 db = SQLAlchemy(app)
-#Connects to the database
-@app.before_request
-def require_login():
-    allowed_routes = ['index', 'blog', 'login', 'signup']
-    if request.endpoint not in allowed_routes and 'email' not in session:
-        return redirect('/login')
-
 
 #Create a class for each blog post with Id, title, Body
 class Blog(db.Model):
@@ -32,11 +26,18 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True)
     password = db.Column(db.String(120))
-    blogs = db.relationship('Blog', backref='owner')
 
     def __init__(self, email, password):
         self.email = email
         self.password = password
+
+#Connects to the database
+@app.before_request
+def require_login():
+    allowed_routes = ['index', 'blog', 'login', 'signup']
+    if request.endpoint not in allowed_routes and 'email' not in session:
+        return redirect('/login')
+
 
 
 @app.route('/')
@@ -46,20 +47,10 @@ def index():
 
 @app.route('/blog', methods=['POST', 'GET'])
 def blog():
+    #returns and displays all the blog posts
+    posts = Blog.query.all()
+    return render_template('blog.html', posts = posts)
     
-    if 'user' in request.args:
-        user_id = request.args.getlist('user')
-        user = User.query.get(user_id)
-        user_blogs = Blog.query.filter_by(owner=user).all()
-        return render_template('user.html', user_blogs=user_blogs)
-    
-    single_post = request.args.get('id')
-    if single_post:
-        blogs = Blog.query.get(single_post)
-        return render_template('post.html', blog=blog)
-    else:
-        blogs = Blog.query.all()
-        return render_template('blog.html', blogs=blogs)
 
 @app.route('/newpost', methods=['POST', 'GET'])
 def new_post():
