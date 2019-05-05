@@ -48,10 +48,10 @@ def index():
 def blog():
     
     if 'user' in request.args:
-        user_id = request.args('user')
+        user_id = request.args.getlist('user')
         user = User.query.get(user_id)
         user_blogs = Blog.query.filter_by(owner=user).all()
-        return render_template('singleuser.html', user_blogs=user_blogs)
+        return render_template('user.html', user_blogs=user_blogs)
     
     single_post = request.args.get('id')
     if single_post:
