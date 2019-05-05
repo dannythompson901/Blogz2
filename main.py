@@ -8,6 +8,11 @@ app.config['SQLALCHEMY_ECHO'] = True
 app.secret_key = 'wakaflaka123'
 db = SQLAlchemy(app)
 #Connects to the database
+@app.before_request
+def require_login():
+    allowed_routes = ['index', 'blog', 'login', 'signup']
+    if request.endpoint not in allowed_routes and 'email' not in session:
+        return redirect('/login')
 
 
 #Create a class for each blog post with Id, title, Body
@@ -33,11 +38,6 @@ class User(db.Model):
         self.email = email
         self.password = password
 
-@app.before_request
-def require_login():
-    allowed_routes = ['index', 'blog', 'login', 'signup']
-    if request.endpoint not in allowed_routes and 'username' not in session:
-        return redirect('/login')
 
 @app.route('/')
 def index():
@@ -55,8 +55,8 @@ def blog():
     
     single_post = request.args.get('id')
     if single_post:
-        blog = Blog.query.get(single_post)
-        return render_template('viewpost.html', blog=blog)
+        blogs = Blog.query.get(single_post)
+        return render_template('post.html', blog=blog)
     else:
         blogs = Blog.query.all()
         return render_template('blog.html', blogs=blogs)
